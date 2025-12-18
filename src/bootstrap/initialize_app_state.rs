@@ -12,6 +12,7 @@ use crate::{
         TransactionCounterRepositoryStorage, TransactionRepositoryStorage,
     },
     utils::initialize_redis_connection,
+    services::stacks_relayer::StacksRelayer,
 };
 use actix_web::web;
 use color_eyre::Result;
@@ -115,6 +116,8 @@ pub async fn initialize_app_state(
     let queue = Queue::setup().await?;
     let job_producer = Arc::new(jobs::JobProducer::new(queue.clone()));
 
+    let stacks_relayer = Arc::new(StacksRelayer::new(server_config.stacks_node_url.clone()));
+
     let app_state = web::ThinData(AppState {
         relayer_repository: repositories.relayer,
         transaction_repository: repositories.transaction,
@@ -125,6 +128,7 @@ pub async fn initialize_app_state(
         job_producer,
         plugin_repository: repositories.plugin,
         api_key_repository: repositories.api_key,
+        stacks_relayer,
     });
 
     Ok(app_state)

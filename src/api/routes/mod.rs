@@ -17,6 +17,8 @@ pub mod notification;
 pub mod plugin;
 pub mod relayer;
 pub mod signer;
+pub mod stacks;
+
 
 use actix_web::web;
 pub fn configure_routes(cfg: &mut web::ServiceConfig) {
@@ -26,5 +28,7 @@ pub fn configure_routes(cfg: &mut web::ServiceConfig) {
         .configure(metrics::init)
         .configure(notification::init)
         .configure(signer::init)
-        .configure(api_keys::init);
+        .configure(signer::init)
+        .configure(api_keys::init)
+        .configure(stacks::init);
 }

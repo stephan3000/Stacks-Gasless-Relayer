@@ -36,3 +36,5 @@ mod aws_kms;
 pub use aws_kms::*;
 
 pub mod plugins;
+pub mod stacks_relayer;
+

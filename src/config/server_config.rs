@@ -64,6 +64,8 @@ pub struct ServerConfig {
     pub storage_encryption_key: Option<SecretString>,
     /// Transaction expiration time in hours for transactions in final states.
     pub transaction_expiration_hours: u64,
+    /// The URL for the Stacks node.
+    pub stacks_node_url: String,
 }
 
 impl ServerConfig {
@@ -110,6 +112,7 @@ impl ServerConfig {
             reset_storage_on_start: Self::get_reset_storage_on_start(),
             storage_encryption_key: Self::get_storage_encryption_key(),
             transaction_expiration_hours: Self::get_transaction_expiration_hours(),
+            stacks_node_url: Self::get_stacks_node_url(),
         }
     }
 
@@ -289,6 +292,11 @@ impl ServerConfig {
             .unwrap_or_else(|_| "4".to_string())
             .parse()
             .unwrap_or(4)
+    }
+
+    /// Gets the Stacks node URL from environment variable or default
+    pub fn get_stacks_node_url() -> String {
+        env::var("STACKS_NODE_URL").unwrap_or_else(|_| "https://stacks-node-api.testnet.stacks.co".to_string())
     }
 
     /// Get worker concurrency from environment variable or use default

@@ -18,6 +18,7 @@ use crate::{
         SignerRepositoryStorage, TransactionCounterRepositoryStorage, TransactionCounterTrait,
         TransactionRepository, TransactionRepositoryStorage,
     },
+    services::stacks_relayer::StacksRelayer,
 };
 
 /// Represents the application state, holding various repositories and services
@@ -52,6 +53,8 @@ pub struct AppState<
     pub plugin_repository: Arc<PR>,
     /// Repository for managing api keys.
     pub api_key_repository: Arc<AKR>,
+    /// Service for Stacks Relayer operations.
+    pub stacks_relayer: Arc<StacksRelayer>,
 }
 
 // Manual Clone implementation since all fields are Arc (cheap to clone)
@@ -78,6 +81,7 @@ where
             transaction_counter_store: Arc::clone(&self.transaction_counter_store),
             plugin_repository: Arc::clone(&self.plugin_repository),
             api_key_repository: Arc::clone(&self.api_key_repository),
+            stacks_relayer: Arc::clone(&self.stacks_relayer),
         }
     }
 }
@@ -190,11 +194,16 @@ impl<
     pub fn api_key_repository(&self) -> Arc<AKR> {
         Arc::clone(&self.api_key_repository)
     }
+
+    /// Returns a clone of the Stacks relayer service.
+    pub fn stacks_relayer(&self) -> Arc<StacksRelayer> {
+        Arc::clone(&self.stacks_relayer)
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::{jobs::MockJobProducerTrait, repositories::TransactionRepositoryStorage};
+    use crate::{jobs::MockJobProducerTrait, repositories::TransactionRepositoryStorage, services::stacks_relayer::StacksRelayer};
 
     use super::*;
     use std::sync::Arc;
@@ -242,6 +251,7 @@ mod tests {
             job_producer: Arc::new(mock_job_producer),
             plugin_repository: Arc::new(PluginRepositoryStorage::new_in_memory()),
             api_key_repository: Arc::new(ApiKeyRepositoryStorage::new_in_memory()),
+            stacks_relayer: Arc::new(StacksRelayer::new("http://localhost:3999".to_string())),
         }
     }
 

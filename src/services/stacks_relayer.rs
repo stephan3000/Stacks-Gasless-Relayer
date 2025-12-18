@@ -1,41 +1,61 @@
 
-use async_trait::async_trait;
-use color_eyre::Result;
-use std::sync::Arc;
-use tracing::{info, error};
 
-// Mocking Stacks-rs types since we don't have the full library documentation available in this context
-// In a real implementation, we would import: use stacks_rs::{Transaction, StacksClient, etc};
+use color_eyre::Result;
+use tracing::{info, error};
+use reqwest::Client;
+use serde::Deserialize;
 
 #[derive(Clone, Debug)]
 pub struct StacksRelayer {
     pub node_url: String,
-    // Add other fields as necessary
+    pub client: Client,
+}
+
+#[derive(Deserialize)]
+struct StacksTxResponse {
+    #[allow(dead_code)] 
+    txid: String,
 }
 
 impl StacksRelayer {
     pub fn new(node_url: String) -> Self {
-        Self { node_url }
+        Self { 
+            node_url,
+            client: Client::new()
+        }
     }
 
     pub async fn broadcast_transaction(&self, tx_hex: &str) -> Result<String> {
         info!("Broadcasting Stacks transaction to {}", self.node_url);
         
-        // In a real implementation, we would use reqwest or stacks-rs client to post the TX
-        // For now, we simulate a successful broadcast
+        // Remove 0x prefix if present
+        let clean_hex = tx_hex.trim_start_matches("0x");
+        let tx_bytes = hex::decode(clean_hex)?;
         
-        let tx_id = format!("0x{}", uuid::Uuid::new_v4().simple().to_string());
+        let url = format!("{}/v2/transactions", self.node_url);
+        
+        let res = self.client.post(&url)
+            .header("Content-Type", "application/octet-stream")
+            .body(tx_bytes)
+            .send()
+            .await?;
+            
+        if !res.status().is_success() {
+            let error_text = res.text().await.unwrap_or_else(|_| "Unknown error".to_string());
+            error!("Stacks Node Error: {}", error_text);
+            return Err(color_eyre::eyre::eyre!("Stacks Node Error: {}", error_text));
+        }
+        
+        // Response string is typically just the quoted TXID string like "0x..."
+        let tx_id = res.text().await?.trim_matches('"').to_string();
         info!("Transaction broadcasted successfully. ID: {}", tx_id);
         
         Ok(tx_id)
     }
     
-    pub async fn validate_transaction(&self, tx_hex: &str) -> Result<bool> {
-        // Implement validation logic:
-        // 1. Parse tx_hex
-        // 2. Verify signature
-        // 3. Check fee settlement contract call
-        
+    pub async fn validate_transaction(&self, _tx_hex: &str) -> Result<bool> {
+        // Validation logic would require parsing the Stacks transaction format
+        // which is complex without stacks-rs. Keeping as mock for now or until stacks-rs is fixed.
         Ok(true)
     }
 }

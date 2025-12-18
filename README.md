@@ -49,17 +49,6 @@ graph TD
 - [Node.js](https://nodejs.org/) (v20+) & npm
 - [Redis](https://redis.io/) (optional, falls back to in-memory)
 
-### 1. Backend Setup
-Clone the repo and configure your environment:
-
-```bash
-# Set up environment variables
-export API_KEY=$(uuidgen)
-export STORAGE_ENCRYPTION_KEY=$(openssl rand -base64 32)
-export STACKS_NODE_URL="https://stacks-node-api.testnet.stacks.co"
-
-# Run the backend
-cargo run
 ```
 
 ### 2. Frontend Dashboard

@@ -131,9 +131,9 @@ impl ServerConfig {
             .unwrap_or(8080)
     }
 
-    /// Gets the Redis URL from environment variable (panics if not set)
+    /// Gets the Redis URL from environment variable (returns empty if not set)
     pub fn get_redis_url() -> String {
-        env::var("REDIS_URL").expect("REDIS_URL must be set")
+        env::var("REDIS_URL").unwrap_or_default()
     }
 
     /// Gets the Redis URL from environment variable or returns None if not set

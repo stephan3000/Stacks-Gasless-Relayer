@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  relayer:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - APP_PORT=8080
+      - HOST=0.0.0.0
+      - REDIS_URL=redis://redis:6379
+      - STACKS_NODE_URL=${STACKS_NODE_URL:-https://stacks-node-api.testnet.stacks.co}
+      - API_KEY=${API_KEY:-dGVzdC1pcy1hLXJlYWxseS1sb25nLWtleS10aGF0LWlzLXZhbGlk}
+      - STORAGE_ENCRYPTION_KEY=${STORAGE_ENCRYPTION_KEY:-dGVzdC1lbmNyeXB0aW9uLWtleS1tdXN0LWJlLTMyLWJ5dGVzIQ==}
+      - REPOSITORY_STORAGE_TYPE=redis
+      - REDIS_KEY_PREFIX=stacks-relayer
+    depends_on:
+      - redis
+    volumes:
+      - ./config:/usr/local/bin/config
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:

@@ -47,8 +47,31 @@ graph TD
 ### Prerequisites
 - [Rust](https://rustup.rs/) (latest stable)
 - [Node.js](https://nodejs.org/) (v20+) & npm
-- [Redis](https://redis.io/) (optional, falls back to in-memory)
+- [Docker](https://www.docker.com/) (Recommended)
 
+### 1. Backend Setup
+
+#### 🐳 Using Docker (Recommended)
+The easiest way to run the relayer is with Docker Compose, which sets up the Relayer service and the required Redis database automatically.
+
+```bash
+docker-compose up --build
+```
+The API will be available at `http://localhost:8080/api/v1`.
+
+#### 🛠️ Manual Setup
+If you prefer to run manually, ensure you have **Redis** running locally.
+
+```bash
+# Set up environment variables
+cp .env.example .env 2>/dev/null || true
+export API_KEY=$(uuidgen)
+export STORAGE_ENCRYPTION_KEY=$(openssl rand -base64 32)
+export STACKS_NODE_URL="https://stacks-node-api.testnet.stacks.co"
+export REDIS_URL="redis://localhost:6379"
+
+# Run the backend
+cargo run
 ```
 
 ### 2. Frontend Dashboard
